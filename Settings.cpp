@@ -26,6 +26,7 @@
 #include "SoapyRTLSDR.hpp"
 #include <SoapySDR/Time.hpp>
 #include <algorithm>
+#include <string>
 
 SoapyRTLSDR::SoapyRTLSDR(const SoapySDR::Kwargs &args):
     deviceId(-1),
@@ -59,14 +60,16 @@ SoapyRTLSDR::SoapyRTLSDR(const SoapySDR::Kwargs &args):
     if (args.count("serial") == 0) throw std::runtime_error("No RTL-SDR devices found!");
 
     const auto serial = args.at("serial");
-    deviceId = rtlsdr_get_index_by_serial(serial.c_str());
+    // deviceId = rtlsdr_get_index_by_serial(serial.c_str());
+    deviceId = 0;
     if (deviceId < 0) throw std::runtime_error("rtlsdr_get_index_by_serial("+serial+") - " + std::to_string(deviceId));
 
     if (args.count("tuner") != 0) tunerType = rtlStringToTuner(args.at("tuner"));
     SoapySDR_logf(SOAPY_SDR_DEBUG, "RTL-SDR Tuner type: %s", rtlTunerToString(tunerType).c_str());
 
+    int fd = std::stoi(args.at("fd"));
     SoapySDR_logf(SOAPY_SDR_DEBUG, "RTL-SDR opening device %d", deviceId);
-    if (rtlsdr_open(&dev, deviceId) != 0) {
+    if (rtlsdr_open_android(&dev, deviceId, fd, args.at("usbfs").c_str()) != 0) {
         throw std::runtime_error("Unable to open RTL-SDR device");
     }
 

@@ -50,39 +50,52 @@ static std::string get_tuner(const std::string &serial, const size_t deviceIndex
 
 static std::vector<SoapySDR::Kwargs> findRTLSDR(const SoapySDR::Kwargs &args)
 {
+    SoapySDR_logf(SOAPY_SDR_INFO, "finding RTLSDR");
     std::vector<SoapySDR::Kwargs> results;
 
-    char manufact[256], product[256], serial[256];
+    // char manufact[256], product[256], serial[256];
 
-    const size_t this_count = rtlsdr_get_device_count();
+    // const size_t this_count = rtlsdr_get_device_count();
 
-    for (size_t i = 0; i < this_count; i++)
-    {
-        if (rtlsdr_get_device_usb_strings(i, manufact, product, serial) != 0)
-        {
-            SoapySDR_logf(SOAPY_SDR_ERROR, "rtlsdr_get_device_usb_strings(%zu) failed", i);
-            continue;
-        }
-        SoapySDR_logf(SOAPY_SDR_DEBUG, "\tManufacturer: %s, Product Name: %s, Serial: %s", manufact, product, serial);
+    // for (size_t i = 0; i < this_count; i++)
+    // {
+    //     if (rtlsdr_get_device_usb_strings(i, manufact, product, serial) != 0)
+    //     {
+    //         SoapySDR_logf(SOAPY_SDR_ERROR, "rtlsdr_get_device_usb_strings(%zu) failed", i);
+    //         continue;
+    //     }
+    //     SoapySDR_logf(SOAPY_SDR_DEBUG, "\tManufacturer: %s, Product Name: %s, Serial: %s", manufact, product, serial);
 
-        SoapySDR::Kwargs devInfo;
-        devInfo["label"] = std::string(rtlsdr_get_device_name(i)) + " :: " + serial;
-        devInfo["product"] = product;
-        devInfo["serial"] = serial;
-        devInfo["manufacturer"] = manufact;
-        devInfo["tuner"] = get_tuner(serial, i);
+    //     SoapySDR::Kwargs devInfo;
+    //     devInfo["label"] = std::string(rtlsdr_get_device_name(i)) + " :: " + serial;
+    //     devInfo["product"] = product;
+    //     devInfo["serial"] = serial;
+    //     devInfo["manufacturer"] = manufact;
+    //     devInfo["tuner"] = get_tuner(serial, i);
 
-        //filtering by serial
-        if (args.count("serial") != 0 and args.at("serial") != serial) continue;
+    //     //filtering by serial
+    //     if (args.count("serial") != 0 and args.at("serial") != serial) continue;
 
-        results.push_back(devInfo);
-    }
+    //     results.push_back(devInfo);
+    // }
+
+    SoapySDR::Kwargs devInfo;
+    devInfo["label"] = "Generic RTL2832U OEM :: 00000001";
+    devInfo["product"] = "RTL2838UHIDIR";
+    devInfo["serial"] = "00000001";
+    devInfo["manufacturer"] = "Realtek";
+    devInfo["tuner"] = "Rafael Micro R820T";
+    devInfo["usbfs"] = args.at("usbfs");
+    devInfo["fd"] = args.at("fd");
+
+    results.push_back(devInfo);
 
     return results;
 }
 
 static SoapySDR::Device *makeRTLSDR(const SoapySDR::Kwargs &args)
 {
+    SoapySDR_logf(SOAPY_SDR_INFO, "making RTLSDR");
     return new SoapyRTLSDR(args);
 }
 
